@@ -1,3 +1,16 @@
 # Interactive REST API Playground
 
-A sleek, self-contained API testing tool in a single HTML file. Features a beautiful UI for constructing HTTP requests, viewing formatted responses, managing request history, and saving collections.
+A self-contained API testing tool in a single HTML file. Just open index.html in your browser!
+
+## Features
+- GET, POST, PUT, PATCH, DELETE support
+- Custom headers management
+- JSON response formatting
+- Request history
+- Response time & size metrics
+
+## Usage
+Simply open `index.html` in any modern browser. No server required!
+
+## Author
+Ankit Sharma

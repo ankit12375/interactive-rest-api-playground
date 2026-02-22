@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REST API Playground</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f172a;--surface:#1e293b;--border:#334155;--text:#e2e8f0;--text-muted:#94a3b8;--primary:#3b82f6;--success:#22c55e;--error:#ef4444;--warning:#f59e0b;--radius:8px;--font:system-ui,-apple-system,sans-serif;--mono:'Fira Code',monospace}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column}
+.header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--primary),#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .subtitle{font-size:12px;color:var(--text-muted)}
+.main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;max-height:calc(100vh - 60px)}
+.panel{display:flex;flex-direction:column;border-right:1px solid var(--border)}
+.panel:last-child{border-right:none}
+.panel-header{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.method-row{display:flex;gap:8px;padding:16px;border-bottom:1px solid var(--border)}
+.method-select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer}
+.method-select option{background:var(--surface)}
+.url-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--radius);font-size:13px;font-family:var(--mono);outline:none}
+.url-input:focus{border-color:var(--primary)}
+.send-btn{background:var(--primary);color:#fff;border:none;padding:8px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.send-btn:hover{opacity:.9}
+.send-btn:disabled{opacity:.5}
+.body-area{flex:1;overflow:auto;padding:16px}
+textarea{width:100%;height:200px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:var(--radius);font-family:var(--mono);font-size:12px;resize:vertical;outline:none}
+textarea:focus{border-color:var(--primary)}
+.headers-section{padding:16px}
+.header-row{display:flex;gap:8px;margin-bottom:8px}
+.header-row input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:var(--radius);font-size:12px;font-family:var(--mono);outline:none}
+.add-header{background:none;border:1px dashed var(--border);color:var(--text-muted);padding:6px 12px;border-radius:var(--radius);cursor:pointer;font-size:12px;width:100%}
+.response-area{flex:1;overflow:auto;padding:16px}
+.status-bar{padding:8px 16px;display:flex;gap:16px;font-size:12px;font-family:var(--mono);border-bottom:1px solid var(--border)}
+.status-badge{padding:2px 8px;border-radius:4px;font-weight:600}
+.status-2xx{background:rgba(34,197,94,.15);color:var(--success)}
+.status-4xx{background:rgba(239,68,68,.15);color:var(--error)}
+.status-5xx{background:rgba(239,68,68,.15);color:var(--error)}
+pre{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-family:var(--mono);font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-word;color:var(--text)}
+.empty-state{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:14px;flex-direction:column;gap:8px}
+.history{padding:16px;max-height:200px;overflow-y:auto}
+.history-item{padding:8px 10px;margin-bottom:4px;border-radius:var(--radius);cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;font-family:var(--mono)}
+.history-item:hover{background:var(--surface)}
+.history-item .method-tag{font-weight:700;font-size:10px;padding:2px 6px;border-radius:3px}
+.GET{color:#22c55e}.POST{color:#3b82f6}.PUT{color:#f59e0b}.DELETE{color:#ef4444}.PATCH{color:#8b5cf6}
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab{padding:8px 16px;font-size:12px;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+@media(max-width:768px){.main{grid-template-columns:1fr;max-height:none}.panel{border-right:none;border-bottom:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<div class="header"><div><h1>REST API Playground</h1><div class="subtitle">Test APIs directly in your browser — no server needed</div></div></div>
+<div class="main">
+<div class="panel">
+<div class="panel-header">Request</div>
+<div class="method-row">
+<select class="method-select" id="method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
+<input class="url-input" id="url" placeholder="https://jsonplaceholder.typicode.com/posts/1" value="https://jsonplaceholder.typicode.com/posts/1">
+<button class="send-btn" id="sendBtn" onclick="sendRequest()">Send</button>
+</div>
+<div class="tabs"><div class="tab active" onclick="switchTab(this,'bodyTab')">Body</div><div class="tab" onclick="switchTab(this,'headersTab')">Headers</div><div class="tab" onclick="switchTab(this,'historyTab')">History</div></div>
+<div id="bodyTab" class="body-area"><textarea id="reqBody" placeholder='{"key": "value"}'></textarea></div>
+<div id="headersTab" class="headers-section" style="display:none"><div id="headerRows"><div class="header-row"><input placeholder="Content-Type" value="Content-Type"><input placeholder="application/json" value="application/json"></div></div><button class="add-header" onclick="addHeader()">+ Add Header</button></div>
+<div id="historyTab" class="history" style="display:none"><div class="empty-state" style="height:auto;padding:20px">No requests yet</div></div>
+</div>
+<div class="panel">
+<div class="panel-header">Response</div>
+<div class="status-bar" id="statusBar" style="display:none"><span>Status: <span class="status-badge" id="statusCode"></span></span><span>Time: <span id="resTime"></span></span><span>Size: <span id="resSize"></span></span></div>
+<div class="response-area" id="responseArea"><div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM9 10h.01M15 10h.01M8 14s1.5 2 4 2 4-2 4-2"/></svg>Send a request to see the response</div></div>
+</div>
+</div>
+<script>
+const history=[];
+function switchTab(el,id){el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');['bodyTab','headersTab','historyTab'].forEach(t=>document.getElementById(t).style.display=t===id?'block':'none')}
+function addHeader(){const row=document.createElement('div');row.className='header-row';row.innerHTML='<input placeholder="Key"><input placeholder="Value">';document.getElementById('headerRows').appendChild(row)}
+function getHeaders(){const rows=document.querySelectorAll('#headerRows .header-row');const h={};rows.forEach(r=>{const inputs=r.querySelectorAll('input');if(inputs[0].value)h[inputs[0].value]=inputs[1].value});return h}
+async function sendRequest(){const method=document.getElementById('method').value;const url=document.getElementById('url').value;const body=document.getElementById('reqBody').value;const btn=document.getElementById('sendBtn');btn.disabled=true;btn.textContent='...';const start=Date.now();try{const opts={method,headers:getHeaders()};if(['POST','PUT','PATCH'].includes(method)&&body)opts.body=body;const res=await fetch(url,opts);const time=Date.now()-start;const text=await res.text();let formatted=text;try{formatted=JSON.stringify(JSON.parse(text),null,2)}catch{}document.getElementById('statusBar').style.display='flex';const sc=document.getElementById('statusCode');sc.textContent=res.status+' '+res.statusText;sc.className='status-badge '+(res.status<300?'status-2xx':res.status<500?'status-4xx':'status-5xx');document.getElementById('resTime').textContent=time+'ms';document.getElementById('resSize').textContent=(new Blob([text]).size/1024).toFixed(1)+'KB';document.getElementById('responseArea').innerHTML='<pre>'+formatted.replace(/</g,'&lt;')+'</pre>';history.unshift({method,url,status:res.status,time});updateHistory()}catch(e){document.getElementById('responseArea').innerHTML='<pre style="color:var(--error)">Error: '+e.message+'</pre>'}btn.disabled=false;btn.textContent='Send'}
+function updateHistory(){const el=document.getElementById('historyTab');el.innerHTML=history.map((h,i)=>'<div class="history-item" onclick="loadHistory('+i+')"><span class="method-tag '+h.method+'">'+h.method+'</span><span>'+h.url.substring(0,40)+'</span></div>').join('')}
+function loadHistory(i){const h=history[i];document.getElementById('method').value=h.method;document.getElementById('url').value=h.url;document.querySelector('.tab').click()}
+</script>
+</body>
+</html>
